@@ -10,9 +10,8 @@
 // optional `img` field overrides that path.
 // `ahId` and `ahSize` are AH's product id and pack size, used by the updater.
 //
-// Use tools/update_products.py to add products or refresh prices; it rewrites
-// this file below the comment. Only append products, never remove or reorder:
-// saved games point at products by position.
+// Use tools/update_products.py to add, replace or refresh products; it rewrites
+// this file below the comment.
 window.PRODUCTS = [
   { name: "AH Houdbare halfvolle melk", en: "Long-life semi-skimmed milk", size: "1 L", price: 0.80, cat: "dairy", ahId: 450534, ahSize: "1 l", url: "https://www.ah.nl/producten/product/wi450534/ah-houdbare-halfvolle-melk" },
   { name: "AH Houdbare volle melk", en: "Long-life whole milk", size: "1 L", price: 0.98, cat: "dairy", ahId: 450535, ahSize: "1 l", url: "https://www.ah.nl/producten/product/wi450535/ah-houdbare-volle-melk" },
@@ -44,6 +43,3 @@ window.PRODUCTS = [
   { name: "AH Biologisch Broccoli", en: "Organic broccoli", size: "per stuk", sizeEn: "1 head", price: 2.79, cat: "produce", ahId: 466127, ahSize: "per stuk", url: "https://www.ah.nl/producten/product/wi466127/ah-biologisch-broccoli" },
   { name: "AH Terra Hollandse bruine bonen", en: "Dutch brown beans", size: "800 g", price: 1.15, cat: "pantry", ahId: 840, ahSize: "800 g", url: "https://www.ah.nl/producten/product/wi840/ah-terra-hollandse-bruine-bonen" },
 ];
-
-// Shifts the daily order so today's product stays put when products are added.
-window.DAILY_OFFSET = 0;

@@ -17,11 +17,6 @@
     </div>
   </header>
 
-  <nav class="modes" role="tablist">
-    <button role="tab" class="mode active" data-mode="daily" aria-selected="true" data-i18n="daily"></button>
-    <button role="tab" class="mode" data-mode="practice" aria-selected="false" data-i18n="practice"></button>
-  </nav>
-
   <main>
     <section class="product" aria-live="polite">
       <div class="product-photo" id="product-photo"></div>
@@ -29,7 +24,6 @@
       <h2 class="product-name" id="product-name"></h2>
       <p class="product-en" id="product-en"></p>
       <p class="product-size" id="product-size"></p>
-      <p class="puzzle-no" id="puzzle-no"></p>
     </section>
 
     <ol class="board" id="board"></ol>
@@ -43,15 +37,15 @@
       <button type="submit" class="primary" id="guess-btn" data-i18n="guess"></button>
     </form>
     <p class="message" id="message" role="status"></p>
+    <button type="button" class="link-btn" id="skip-btn" data-i18n="skip"></button>
 
     <div class="result" id="result" hidden>
       <p class="result-title" id="result-title"></p>
       <p class="result-price" id="result-price"></p>
       <div class="result-actions">
         <button class="primary" id="share-btn" data-i18n="share"></button>
-        <button class="secondary" id="next-btn" data-i18n="next" hidden></button>
+        <button class="secondary" id="next-btn" data-i18n="next"></button>
       </div>
-      <p class="countdown" id="countdown"></p>
     </div>
   </main>
 

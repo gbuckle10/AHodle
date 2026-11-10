@@ -84,26 +84,6 @@ body {
   cursor: pointer;
 }
 
-.modes {
-  display: flex;
-  gap: 4px;
-  margin: 14px 0 0;
-  padding: 4px;
-  background: var(--empty);
-  border-radius: 999px;
-}
-.mode {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  padding: 6px 18px;
-  border-radius: 999px;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-.mode.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
-
 main {
   width: 100%;
   max-width: 480px;
@@ -128,7 +108,6 @@ main {
 .product-en { margin: 0 0 2px; color: var(--muted); font-style: italic; }
 .product-en:empty { display: none; }
 .product-size { margin: 0; color: var(--muted); font-weight: 600; }
-.puzzle-no { margin: 6px 0 0; color: var(--muted); font-size: 0.8rem; }
 
 .board { list-style: none; margin: 12px 0; padding: 0; display: grid; gap: 6px; }
 .row {
@@ -192,6 +171,18 @@ main {
 .primary:disabled { opacity: 0.5; cursor: default; }
 
 .message { min-height: 1.4em; text-align: center; color: var(--muted); margin: 10px 0 0; }
+.link-btn {
+  display: block;
+  margin: 4px auto 0;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit; font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-btn[hidden] { display: none; }
 
 .result {
   text-align: center;
@@ -205,7 +196,6 @@ main {
 .result-price { margin: 4px 0 12px; color: var(--muted); }
 .result-price strong { color: var(--text); font-size: 1.3rem; }
 .result-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-.countdown { margin: 12px 0 0; color: var(--muted); font-size: 0.9rem; }
 
 footer { padding: 16px; max-width: 480px; color: var(--muted); font-size: 0.8rem; line-height: 1.5; text-align: center; }
 footer a { color: inherit; }
@@ -242,4 +232,4 @@ dialog .close {
   text-align: right; padding: 2px 6px; border-radius: 4px;
   min-width: 24px; font-weight: 700;
 }
-.dist-bar.today { background: var(--hit); }
+.dist-bar.latest { background: var(--hit); }

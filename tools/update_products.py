@@ -6,13 +6,11 @@
     python tools/update_products.py refresh
 
 `add` looks the product up, downloads its photo into img/ and appends it to
-js/products.js. Products that can't be ordered on ah.nl are refused. Anything not given as an option is asked for (press Enter for
-the suggestion in brackets). It also adjusts DAILY_OFFSET so today's daily
-product doesn't change.
+js/products.js. Products that can't be ordered on ah.nl are refused. Anything
+not given as an option is asked for (press Enter for the suggestion in brackets).
 
-`replace` swaps a product (by exact name or AH id) for a new one in the same
-position, so the daily order stays the same. Use it for products that `refresh`
-says can't be ordered any more.
+`replace` swaps a product (by exact name or AH id) for a new one. Use it for
+products that `refresh` says can't be ordered any more.
 
 `refresh` updates every product's regular price (Bonus offers are ignored),
 reports pack-size or name changes, downloads any missing photos and warns
@@ -25,14 +23,12 @@ import json
 import re
 import sys
 import unicodedata
-from datetime import date
 from pathlib import Path
 
 import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 PRODUCTS_JS = ROOT / "js" / "products.js"
-GAME_JS = ROOT / "js" / "game.js"
 IMG_DIR = ROOT / "img"
 
 CATS = ["dairy", "bakery", "pantry", "drinks", "meat", "cheese", "produce"]
@@ -95,7 +91,6 @@ def image_url(p):
 
 HEAD_RE = re.compile(r"^(.*?window\.PRODUCTS = \[\n)(.*?)(\n\];\n.*)$", re.S)
 FIELD_RE = re.compile(r'(\w+): ("(?:[^"\\]|\\.)*"|-?[0-9.]+)')
-OFFSET_RE = re.compile(r"window\.DAILY_OFFSET = (-?\d+);")
 
 
 def load():
@@ -168,50 +163,6 @@ def english_size(size):
     s = re.sub(r"\bzakjes\b", "bags", s)
     s = re.sub(r"(\d),(\d)", r"\1.\2", s)
     return s
-
-# ---------- daily order (mirrors game.js) ----------
-
-MASK = 0xFFFFFFFF
-
-
-def mulberry32(a):
-    a &= MASK
-
-    def rand():
-        nonlocal a
-        a = (a + 0x6D2B79F5) & MASK
-        t = ((a ^ (a >> 15)) * (1 | a)) & MASK
-        t = ((t + (((t ^ (t >> 7)) * (61 | t)) & MASK)) & MASK) ^ t
-        return ((t ^ (t >> 14)) & MASK) / 4294967296
-
-    return rand
-
-
-def daily_order(n, seed):
-    rand = mulberry32(seed)
-    order = list(range(n))
-    for i in range(n - 1, 0, -1):
-        j = int(rand() * (i + 1))
-        order[i], order[j] = order[j], order[i]
-    return order
-
-
-def game_constants():
-    src = GAME_JS.read_text(encoding="utf-8")
-    seed = int(re.search(r"const SEED = (\d+);", src).group(1))
-    y, m, d = map(int, re.search(r"const EPOCH = new Date\((\d+), (\d+), (\d+)\)", src).groups())
-    return seed, date(y, m + 1, d)  # JS months are 0-based
-
-
-def keep_today(tail, old_n, new_n):
-    """Return tail with DAILY_OFFSET changed so today's product is the same with new_n products."""
-    seed, epoch = game_constants()
-    day = (date.today() - epoch).days + 1
-    offset = int(OFFSET_RE.search(tail).group(1))
-    today_idx = daily_order(old_n, seed)[(day - 1 + offset) % old_n]
-    pos = daily_order(new_n, seed).index(today_idx)
-    new_offset = (pos - (day - 1)) % new_n
-    return OFFSET_RE.sub(f"window.DAILY_OFFSET = {new_offset};", tail)
 
 # ---------- commands ----------
 
@@ -288,10 +239,9 @@ def new_entry(ap, args, cat_default=None):
 def cmd_add(args):
     head, products, tail = load()
     p = new_entry(lookup(args.url, products), args)
-    tail = keep_today(tail, len(products), len(products) + 1)
     products.append(p)
     save(head, products, tail)
-    print(f"Added {p['name']} (product #{len(products)}). Today's daily product is unchanged.")
+    print(f"Added {p['name']} (product #{len(products)}).")
 
 
 def cmd_replace(args):
@@ -308,7 +258,7 @@ def cmd_replace(args):
     old_photo.unlink(missing_ok=True)
     products[i] = p
     save(head, products, tail)
-    print(f"Replaced product #{i + 1} with {p['name']}. The daily order is unchanged.")
+    print(f"Replaced product #{i + 1} with {p['name']}.")
 
 
 def cmd_refresh(args):
@@ -374,7 +324,7 @@ def main():
     add.add_argument("--size", help="size shown in game (default: AH's pack size)")
     add.add_argument("--size-en", help="size in English")
     add.set_defaults(func=cmd_add)
-    replace = sub.add_parser("replace", help="swap a product for another one, keeping its place in the daily order")
+    replace = sub.add_parser("replace", help="swap a product for another one")
     replace.add_argument("old", help="exact name or AH id of the product to replace")
     replace.add_argument("url", help="ah.nl link of the new product")
     for flag, help_text in [("--en", "English name"), ("--size", "size shown in game"), ("--size-en", "size in English")]:

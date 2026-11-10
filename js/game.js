@@ -4,8 +4,6 @@
   const HIT_MIN_EUR = 0.05;    // ...or within 5 cents, so cheap items stay fair
   const CLOSE_PCT = 0.25;
   const CLOSE_MIN_EUR = 0.10;  // likewise for "close" on very cheap items
-  const EPOCH = new Date(2026, 10, 10); // puzzle #1 (local time)
-  const SEED = 20261110;
 
   const products = window.PRODUCTS;
   const $ = (id) => document.getElementById(id);
@@ -14,53 +12,51 @@
   const STRINGS = {
     nl: {
       switchTo: "EN", switchLabel: "Switch to English", locale: "nl-NL",
-      daily: "Dagelijks", practice: "Oefenen", guess: "Gok",
+      guess: "Gok",
       inputLabel: "Jouw gok in euro", placeholder: "0,00",
       share: "Deel", next: "Volgend product", close: "Sluiten",
-      dailyNo: (n) => `Dagelijks #${n}`, practiceLabel: "Oefenronde",
+      skip: "Overslaan, ken ik al", skipConfirm: "Overslaan telt als verloren ronde. Doorgaan?",
       invalid: "Typ een prijs, bijvoorbeeld 2,49",
       copied: "Resultaat gekopieerd",
       higher: "hoger", lower: "lager", correct: "goed",
       wins: ["In één keer goed! 🎯", "Briljant!", "Goed gegokt!", "Mooi!", "Pfoe!", "Net op tijd!"],
       lose: "Helaas, geen gokken meer",
       priceWas: (p) => `De prijs was <strong>${p}</strong>`,
-      nextIn: (t) => `Nieuw product over ${t}`,
       howToPlay: "Zo werkt het",
       help1: "Raad de normale prijs van het product in <strong>6 pogingen</strong>.",
       help2: "Na elke gok zie je of de echte prijs hoger <b>⬆</b> of lager <b>⬇</b> is.",
       legendHit: "Binnen 5% (of 5 cent): gewonnen!",
       legendClose: "Binnen 25% (of 10 cent)",
       legendFar: "Meer dan 25% ernaast",
-      help3: "Elke nacht om middernacht verschijnt een nieuw dagelijks product. Bij Oefenen krijg je onbeperkt willekeurige producten.",
-      statsTitle: "Statistieken (dagelijks)", distribution: "Verdeling van gokken",
+      help3: "Na elke ronde krijg je een nieuw product. Je ziet alle producten voordat er een terugkomt.",
+      statsTitle: "Statistieken", distribution: "Verdeling van gokken",
       played: "Gespeeld", winPct: "Winst %", streak: "Reeks", best: "Beste",
       cats: { dairy: "Zuivel & eieren", bakery: "Brood", pantry: "Voorraadkast", drinks: "Koffie & thee", meat: "Vlees", cheese: "Kaas", produce: "Groente & fruit" },
-      footer: 'Prijzen en foto’s: Albert Heijn, opgehaald op 10 november 2026. Normale prijs zonder Bonus. Prijzen kunnen inmiddels veranderd zijn. Productlijst gebaseerd op de <a href="https://voordly.com/boodschappenlijst" target="_blank" rel="noopener">voordly Boodschappenlijst Index</a>. Fanproject, niet verbonden aan Albert Heijn.',
+      footer: "Prijzen en foto’s: Albert Heijn, opgehaald op 10 november 2026. Normale prijs zonder Bonus. Prijzen kunnen inmiddels veranderd zijn. Fanproject, niet verbonden aan Albert Heijn.",
     },
     en: {
       switchTo: "NL", switchLabel: "Schakel naar Nederlands", locale: "en-GB",
-      daily: "Daily", practice: "Practice", guess: "Guess",
+      guess: "Guess",
       inputLabel: "Your price guess in euros", placeholder: "0.00",
       share: "Share", next: "Next product", close: "Close",
-      dailyNo: (n) => `Daily #${n}`, practiceLabel: "Practice",
+      skip: "Skip, I know this one", skipConfirm: "Skipping now counts as a lost round. Continue?",
       invalid: "Enter a price like 2.49",
       copied: "Result copied to clipboard",
       higher: "higher", lower: "lower", correct: "correct",
       wins: ["Spot on! 🎯", "Brilliant!", "Great guess!", "Nice!", "Phew!", "Just made it!"],
       lose: "Out of guesses",
       priceWas: (p) => `The price was <strong>${p}</strong>`,
-      nextIn: (t) => `Next product in ${t}`,
       howToPlay: "How to play",
       help1: "Guess the regular shelf price of the product in <strong>6 tries</strong>.",
       help2: "After each guess you'll see whether the real price is higher <b>⬆</b> or lower <b>⬇</b>.",
       legendHit: "Within 5% (or 5 cents): you win!",
       legendClose: "Within 25% (or 10 cents)",
       legendFar: "More than 25% off",
-      help3: "A new daily product appears every midnight. Practice mode gives you unlimited random products.",
-      statsTitle: "Daily statistics", distribution: "Guess distribution",
+      help3: "After each round you get a new product. You'll see every product before any comes back.",
+      statsTitle: "Statistics", distribution: "Guess distribution",
       played: "Played", winPct: "Win %", streak: "Streak", best: "Best",
       cats: { dairy: "Dairy & eggs", bakery: "Bread", pantry: "Pantry", drinks: "Coffee & tea", meat: "Meat", cheese: "Cheese", produce: "Fruit & veg" },
-      footer: 'Prices and photos: Albert Heijn, retrieved 10 November 2026. Regular price without Bonus deals. Prices may have changed since. Product list based on the <a href="https://voordly.com/boodschappenlijst" target="_blank" rel="noopener">voordly Boodschappenlijst Index</a>. Fan-made game, not affiliated with Albert Heijn.',
+      footer: "Prices and photos: Albert Heijn, retrieved 10 November 2026. Regular price without Bonus deals. Prices may have changed since. Fan-made game, not affiliated with Albert Heijn.",
     },
   };
 
@@ -99,60 +95,42 @@
     return "far";
   }
 
-  function mulberry32(a) {
-    return () => {
-      a |= 0; a = (a + 0x6d2b79f5) | 0;
-      let t = Math.imul(a ^ (a >>> 15), 1 | a);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  // Fixed shuffled order so each product appears once before any repeats.
-  const dailyOrder = (() => {
-    const rand = mulberry32(SEED);
-    const order = products.map((_, i) => i);
-    for (let i = order.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1));
-      [order[i], order[j]] = [order[j], order[i]];
-    }
-    return order;
-  })();
-
-  function dayNumber() {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    return Math.round((today - EPOCH) / 86400000) + 1;
-  }
-
   // ---------- state ----------
-  // Bump the key if existing products are removed or reordered, so a saved game
-  // never points at a different product. Appending products is safe.
-  const DAILY_KEY = "ahodle-daily-v2";
-  // Set by tools/update_products.py, which mirrors dailyOrder in Python.
-  const DAILY_OFFSET = window.DAILY_OFFSET || 0;
-  let mode = "daily";
-  let game; // { productIndex, guesses: [{value, grade}], done, won, day? }
+  let game; // { productIndex, guesses: [{value, grade}], done, won }
 
-  function newDailyGame() {
-    const day = dayNumber();
-    const saved = store.get(DAILY_KEY, null);
-    if (saved && saved.day === day) return saved;
-    const n = products.length;
-    const idx = dailyOrder[(((day - 1 + DAILY_OFFSET) % n) + n) % n];
-    return { day, productIndex: idx, guesses: [], done: false, won: false };
+  // Randomly shuffled deck so every product comes up once before any repeats.
+  // It's saved (by product name, so editing the list is safe) so a page refresh
+  // carries on with the same deck instead of starting over.
+  const DECK_KEY = "ahodle-deck";
+  const LAST_KEY = "ahodle-last";
+
+  function shuffledDeck() {
+    const deck = products.map((p) => p.name);
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    // Don't start a new deck with the product just played.
+    const last = store.get(LAST_KEY, null);
+    if (deck.length > 1 && deck[deck.length - 1] === last) {
+      [deck[0], deck[deck.length - 1]] = [deck[deck.length - 1], deck[0]];
+    }
+    return deck;
   }
 
-  function newPracticeGame() {
-    let idx;
-    do {
-      idx = Math.floor(Math.random() * products.length);
-    } while (products.length > 1 && game && game.productIndex === idx);
-    return { productIndex: idx, guesses: [], done: false, won: false };
+  function nextProductIndex() {
+    const names = new Set(products.map((p) => p.name));
+    let deck = store.get(DECK_KEY, []).filter((n) => names.has(n));
+    if (!deck.length) deck = shuffledDeck();
+    const name = deck.pop();
+    store.set(DECK_KEY, deck);
+    store.set(LAST_KEY, name);
+    return products.findIndex((p) => p.name === name);
   }
 
-  function save() {
-    if (mode === "daily") store.set(DAILY_KEY, game);
+  function newGame() {
+    game = { productIndex: nextProductIndex(), guesses: [], done: false, won: false };
+    render();
   }
 
   // ---------- rendering ----------
@@ -198,7 +176,6 @@
     $("product-name").textContent = p.name;
     $("product-en").textContent = lang === "en" ? p.en : "";
     $("product-size").textContent = lang === "en" && p.sizeEn ? p.sizeEn : p.size;
-    $("puzzle-no").textContent = mode === "daily" ? t().dailyNo(game.day) : t().practiceLabel;
   }
 
   function renderBoard(animateLast = false) {
@@ -228,6 +205,7 @@
   function renderEnd() {
     const done = game.done;
     $("guess-form").hidden = done;
+    $("skip-btn").hidden = done;
     $("result").hidden = !done;
     $("message").textContent = "";
     if (!done) {
@@ -237,8 +215,7 @@
     const p = products[game.productIndex];
     $("result-title").textContent = game.won ? t().wins[game.guesses.length - 1] : t().lose;
     $("result-price").innerHTML = t().priceWas(fmt(p.price));
-    $("next-btn").hidden = mode !== "practice";
-    updateCountdown();
+    $("next-btn").focus();
   }
 
   function render(animateLast = false) {
@@ -248,60 +225,39 @@
     renderEnd();
   }
 
-  function updateCountdown() {
-    const el = $("countdown");
-    if (mode !== "daily" || !game.done) {
-      el.textContent = "";
-      return;
-    }
-    const now = new Date();
-    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    const s = Math.max(0, Math.floor((midnight - now) / 1000));
-    const pad = (v) => String(v).padStart(2, "0");
-    el.textContent = t().nextIn(`${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`);
-  }
-  setInterval(() => {
-    // Roll over to the new daily product if the page stays open past midnight.
-    if (mode === "daily" && game.day !== dayNumber()) {
-      game = newDailyGame();
-      render();
-    }
-    updateCountdown();
-  }, 1000);
-
   // ---------- stats ----------
-  function recordDailyResult() {
-    const stats = store.get("ahodle-stats", { played: 0, wins: 0, streak: 0, maxStreak: 0, dist: [0, 0, 0, 0, 0, 0], lastDay: null });
+  const STATS_KEY = "ahodle-stats-v2"; // v1 held daily-mode stats
+  const emptyStats = () => ({ played: 0, wins: 0, streak: 0, maxStreak: 0, dist: [0, 0, 0, 0, 0, 0], last: 0 });
+
+  function recordResult() {
+    const stats = store.get(STATS_KEY, emptyStats());
     stats.played++;
     if (game.won) {
       stats.wins++;
-      stats.streak = stats.lastDay === game.day - 1 ? stats.streak + 1 : 1;
+      stats.streak++;
       stats.maxStreak = Math.max(stats.maxStreak, stats.streak);
       stats.dist[game.guesses.length - 1]++;
-      stats.lastDay = game.day;
+      stats.last = game.guesses.length;
     } else {
       stats.streak = 0;
-      stats.lastDay = null;
+      stats.last = 0;
     }
-    store.set("ahodle-stats", stats);
+    store.set(STATS_KEY, stats);
   }
 
   function showStats() {
     const s = t();
-    const stats = store.get("ahodle-stats", { played: 0, wins: 0, streak: 0, maxStreak: 0, dist: [0, 0, 0, 0, 0, 0] });
-    // A streak only counts if yesterday (or today) was won.
-    const streak = stats.lastDay >= dayNumber() - 1 ? stats.streak : 0;
+    const stats = store.get(STATS_KEY, emptyStats());
     const pct = stats.played ? Math.round((stats.wins / stats.played) * 100) : 0;
     $("stats").innerHTML = [
-      [stats.played, s.played], [pct, s.winPct], [streak, s.streak], [stats.maxStreak, s.best],
+      [stats.played, s.played], [pct, s.winPct], [stats.streak, s.streak], [stats.maxStreak, s.best],
     ].map(([v, l]) => `<div><strong>${v}</strong><span>${l}</span></div>`).join("");
 
+    // Highlight the row of the most recent win.
     const max = Math.max(1, ...stats.dist);
-    const todayDaily = store.get(DAILY_KEY, null);
-    const todayWinRow = todayDaily && todayDaily.day === dayNumber() && todayDaily.won ? todayDaily.guesses.length : 0;
     $("dist").innerHTML = stats.dist.map((count, i) => `
       <div class="dist-row"><span>${i + 1}</span>
-        <div class="dist-bar${todayWinRow === i + 1 ? " today" : ""}" style="width:${Math.max(8, (count / max) * 100)}%">${count}</div>
+        <div class="dist-bar${stats.last === i + 1 ? " latest" : ""}" style="width:${Math.max(8, (count / max) * 100)}%">${count}</div>
       </div>`).join("");
     $("stats-dialog").showModal();
   }
@@ -325,21 +281,31 @@
     } else if (game.guesses.length >= MAX_GUESSES) {
       game.done = true;
     }
-    if (game.done && mode === "daily") recordDailyResult();
-    save();
+    if (game.done) recordResult();
     render(true);
   }
 
+  // Skipping before guessing is free; after guessing it counts as a loss,
+  // so skipping can't be used to protect a streak.
+  function skip() {
+    if (game.guesses.length) {
+      if (!confirm(t().skipConfirm)) return;
+      game.done = true;
+      recordResult();
+    }
+    newGame();
+  }
+
   async function share() {
-    const price = products[game.productIndex].price;
+    const p = products[game.productIndex];
     const rows = game.guesses.map((g) => {
       const colour = { hit: "🟩", close: "🟨", far: "⬜" }[g.grade];
-      const arrow = g.grade === "hit" ? "🎯" : g.value < price ? "⬆️" : "⬇️";
+      const arrow = g.grade === "hit" ? "🎯" : g.value < p.price ? "⬆️" : "⬇️";
       return colour + arrow;
     });
-    const title = mode === "daily" ? `AHodle #${game.day}` : `AHodle (${t().practice.toLowerCase()})`;
+    // No shared daily product, so name the product so friends know what was guessed.
     const score = game.won ? game.guesses.length : "X";
-    const text = `${title} ${score}/${MAX_GUESSES}\n${rows.join("\n")}`;
+    const text = `AHodle ${score}/${MAX_GUESSES}: ${p.name}\n${rows.join("\n")}\n${location.href}`;
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) {
         await navigator.share({ text });
@@ -353,17 +319,6 @@
     }
   }
 
-  function setMode(next) {
-    mode = next;
-    document.querySelectorAll(".mode").forEach((b) => {
-      const active = b.dataset.mode === next;
-      b.classList.toggle("active", active);
-      b.setAttribute("aria-selected", active);
-    });
-    game = next === "daily" ? newDailyGame() : newPracticeGame();
-    render();
-  }
-
   function toggleLang() {
     lang = lang === "nl" ? "en" : "nl";
     store.set("ahodle-lang", lang);
@@ -374,13 +329,13 @@
   // ---------- wire up ----------
   $("guess-form").addEventListener("submit", submitGuess);
   $("share-btn").addEventListener("click", share);
-  $("next-btn").addEventListener("click", () => { game = newPracticeGame(); render(); });
+  $("next-btn").addEventListener("click", newGame);
+  $("skip-btn").addEventListener("click", skip);
   $("help-btn").addEventListener("click", () => $("help-dialog").showModal());
   $("stats-btn").addEventListener("click", showStats);
   $("lang-btn").addEventListener("click", toggleLang);
-  document.querySelectorAll(".mode").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
 
-  setMode("daily");
+  newGame();
   if (!store.get("ahodle-seen-help", false)) {
     $("help-dialog").showModal();
     store.set("ahodle-seen-help", true);
