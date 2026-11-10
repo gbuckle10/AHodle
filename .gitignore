@@ -1,0 +1,5 @@
+# From another project, not part of AHodle
+albert_heijn.py
+
+__pycache__/
+*.tmp

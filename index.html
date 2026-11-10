@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AHodle</title>
+  <meta name="description" content="Guess the price of a Dutch supermarket product in six tries.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="icon-btn" id="help-btn" data-i18n-label="howToPlay">?</button>
+    <h1>AH<span>odle</span></h1>
+    <div class="topbar-right">
+      <button class="lang-btn" id="lang-btn"></button>
+      <button class="icon-btn" id="stats-btn" data-i18n-label="statsTitle">📊</button>
+    </div>
+  </header>
+
+  <nav class="modes" role="tablist">
+    <button role="tab" class="mode active" data-mode="daily" aria-selected="true" data-i18n="daily"></button>
+    <button role="tab" class="mode" data-mode="practice" aria-selected="false" data-i18n="practice"></button>
+  </nav>
+
+  <main>
+    <section class="product" aria-live="polite">
+      <div class="product-photo" id="product-photo"></div>
+      <p class="product-category" id="product-category"></p>
+      <h2 class="product-name" id="product-name"></h2>
+      <p class="product-en" id="product-en"></p>
+      <p class="product-size" id="product-size"></p>
+      <p class="puzzle-no" id="puzzle-no"></p>
+    </section>
+
+    <ol class="board" id="board"></ol>
+
+    <form class="guess-form" id="guess-form" autocomplete="off">
+      <label for="guess-input" class="visually-hidden" data-i18n="inputLabel"></label>
+      <div class="input-wrap">
+        <span class="euro">€</span>
+        <input id="guess-input" inputmode="decimal" placeholder="0,00" maxlength="7" required>
+      </div>
+      <button type="submit" class="primary" id="guess-btn" data-i18n="guess"></button>
+    </form>
+    <p class="message" id="message" role="status"></p>
+
+    <div class="result" id="result" hidden>
+      <p class="result-title" id="result-title"></p>
+      <p class="result-price" id="result-price"></p>
+      <div class="result-actions">
+        <button class="primary" id="share-btn" data-i18n="share"></button>
+        <button class="secondary" id="next-btn" data-i18n="next" hidden></button>
+      </div>
+      <p class="countdown" id="countdown"></p>
+    </div>
+  </main>
+
+  <footer data-i18n-html="footer"></footer>
+
+  <dialog id="help-dialog">
+    <form method="dialog"><button class="close" data-i18n-label="close">✕</button></form>
+    <h3 data-i18n="howToPlay"></h3>
+    <p data-i18n-html="help1"></p>
+    <p data-i18n-html="help2"></p>
+    <ul class="legend">
+      <li><span class="chip hit"></span><span data-i18n="legendHit"></span></li>
+      <li><span class="chip close"></span><span data-i18n="legendClose"></span></li>
+      <li><span class="chip far"></span><span data-i18n="legendFar"></span></li>
+    </ul>
+    <p data-i18n="help3"></p>
+  </dialog>
+
+  <dialog id="stats-dialog">
+    <form method="dialog"><button class="close" data-i18n-label="close">✕</button></form>
+    <h3 data-i18n="statsTitle"></h3>
+    <div class="stats" id="stats"></div>
+    <h4 data-i18n="distribution"></h4>
+    <div class="dist" id="dist"></div>
+  </dialog>
+
+  <script src="js/products.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
