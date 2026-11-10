@@ -31,7 +31,7 @@
       help3: "Na elke ronde krijg je een nieuw product. Je ziet alle producten voordat er een terugkomt.",
       statsTitle: "Statistieken", distribution: "Verdeling van gokken",
       played: "Gespeeld", winPct: "Winst %", streak: "Reeks", best: "Beste",
-      cats: { dairy: "Zuivel & eieren", bakery: "Brood", pantry: "Voorraadkast", drinks: "Koffie & thee", meat: "Vlees", cheese: "Kaas", produce: "Groente & fruit" },
+      cats: { dairy: "Zuivel & eieren", bakery: "Brood", pantry: "Voorraadkast", drinks: "Koffie & thee", meat: "Vlees", cheese: "Kaas", produce: "Groente & fruit", sweets: "Snoep" },
       footer: "Prijzen en foto’s: Albert Heijn, opgehaald op 10 november 2026. Normale prijs zonder Bonus. Prijzen kunnen inmiddels veranderd zijn. Fanproject, niet verbonden aan Albert Heijn.",
     },
     en: {
@@ -55,7 +55,7 @@
       help3: "After each round you get a new product. You'll see every product before any comes back.",
       statsTitle: "Statistics", distribution: "Guess distribution",
       played: "Played", winPct: "Win %", streak: "Streak", best: "Best",
-      cats: { dairy: "Dairy & eggs", bakery: "Bread", pantry: "Pantry", drinks: "Coffee & tea", meat: "Meat", cheese: "Cheese", produce: "Fruit & veg" },
+      cats: { dairy: "Dairy & eggs", bakery: "Bread", pantry: "Pantry", drinks: "Coffee & tea", meat: "Meat", cheese: "Cheese", produce: "Fruit & veg", sweets: "Sweets" },
       footer: "Prices and photos: Albert Heijn, retrieved 10 November 2026. Regular price without Bonus deals. Prices may have changed since. Fan-made game, not affiliated with Albert Heijn.",
     },
   };

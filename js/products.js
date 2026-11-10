@@ -42,4 +42,5 @@ window.PRODUCTS = [
   { name: "AH Winterpeen", en: "Winter carrots", size: "1 kg", price: 1.39, cat: "produce", ahId: 4076, ahSize: "1 kg", url: "https://www.ah.nl/producten/product/wi4076/ah-winterpeen" },
   { name: "AH Biologisch Broccoli", en: "Organic broccoli", size: "per stuk", sizeEn: "1 head", price: 2.79, cat: "produce", ahId: 466127, ahSize: "per stuk", url: "https://www.ah.nl/producten/product/wi466127/ah-biologisch-broccoli" },
   { name: "AH Terra Hollandse bruine bonen", en: "Dutch brown beans", size: "800 g", price: 1.15, cat: "pantry", ahId: 840, ahSize: "800 g", url: "https://www.ah.nl/producten/product/wi840/ah-terra-hollandse-bruine-bonen" },
+  { name: "Katja Knuffel kittens", en: "Katja Knuffel kittens", size: "250 g", price: 2.69, cat: "sweets", ahId: 613565, ahSize: "250 g", url: "https://www.ah.nl/producten/product/wi613565/katja-knuffel-kittens" },
 ];

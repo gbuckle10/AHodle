@@ -29,9 +29,24 @@ import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 PRODUCTS_JS = ROOT / "js" / "products.js"
+GAME_JS = ROOT / "js" / "game.js"
 IMG_DIR = ROOT / "img"
 
-CATS = ["dairy", "bakery", "pantry", "drinks", "meat", "cheese", "produce"]
+
+def read_cats():
+    """Category keys from the `cats: { ... }` lists in game.js (one per language).
+
+    Returns (usable, untranslated): keys present in every language, and keys
+    missing from at least one, which would show as "undefined" in the game.
+    """
+    blocks = re.findall(r"cats: \{([^}]*)\}", GAME_JS.read_text(encoding="utf-8"))
+    per_lang = [re.findall(r"(\w+):", b) for b in blocks]
+    all_keys = list(dict.fromkeys(k for keys in per_lang for k in keys))
+    usable = [k for k in all_keys if all(k in keys for keys in per_lang)]
+    return usable, [k for k in all_keys if k not in usable]
+
+
+CATS, UNTRANSLATED_CATS = read_cats()
 FIELD_ORDER = ["name", "en", "size", "sizeEn", "price", "cat", "img", "ahId", "ahSize", "url"]
 
 # ---------- AH API (same requests as albert_heijn.py) ----------
@@ -184,8 +199,9 @@ def guess_cat(ah_product):
         (("vlees", "vis", "kip", "vega"), "meat"),
         (("groente", "fruit", "aardappel"), "produce"),
         (("koffie", "thee", "frisdrank", "sap", "drank", "water"), "drinks"),
+        (("snoep", "chocolade", "koek", "zoet"), "sweets"),
     ]:
-        if any(w in main for w in words):
+        if cat in CATS and any(w in main for w in words):
             return cat
     return "pantry"
 
@@ -220,8 +236,10 @@ def new_entry(ap, args, cat_default=None):
 
     en = args.en or ask("English name", name)
     cat = args.cat or ask(f"Category ({', '.join(CATS)})", cat_default or guess_cat(ap))
+    if cat in UNTRANSLATED_CATS:
+        sys.exit(f"Category {cat!r} is missing from one of the `cats` lists in game.js; add it to both languages.")
     if cat not in CATS:
-        sys.exit(f"Unknown category {cat!r}; add it to `cats` in game.js first.")
+        sys.exit(f"Unknown category {cat!r}; add it to `cats` in game.js (in both languages) first.")
     size = args.size or ask("Size shown in game", display_size(ah_size))
     p = {"name": name, "en": en, "size": size}
     size_en = args.size_en or ask("Size in English", english_size(size))
@@ -320,7 +338,7 @@ def main():
     add = sub.add_parser("add", help="add a product from its ah.nl link")
     add.add_argument("url")
     add.add_argument("--en", help="English name")
-    add.add_argument("--cat", choices=CATS)
+    add.add_argument("--cat", help="category key from `cats` in game.js")
     add.add_argument("--size", help="size shown in game (default: AH's pack size)")
     add.add_argument("--size-en", help="size in English")
     add.set_defaults(func=cmd_add)
@@ -329,7 +347,7 @@ def main():
     replace.add_argument("url", help="ah.nl link of the new product")
     for flag, help_text in [("--en", "English name"), ("--size", "size shown in game"), ("--size-en", "size in English")]:
         replace.add_argument(flag, help=help_text)
-    replace.add_argument("--cat", choices=CATS)
+    replace.add_argument("--cat", help="category key from `cats` in game.js")
     replace.set_defaults(func=cmd_replace)
     refresh = sub.add_parser("refresh", help="update prices of all products")
     refresh.set_defaults(func=cmd_refresh)
